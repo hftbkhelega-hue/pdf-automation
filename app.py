@@ -1,6 +1,7 @@
 import streamlit as st
+import fitz  # PyMuPDF
 
-st.title("📄 PDF Upload System")
+st.title("📄 PDF Reader System")
 
 uploaded_files = st.file_uploader(
     "Upload your PDF files",
@@ -9,6 +10,15 @@ uploaded_files = st.file_uploader(
 )
 
 if uploaded_files:
-    st.write("### Uploaded Files:")
     for file in uploaded_files:
-        st.write(file.name)
+        st.write(f"### 📄 {file.name}")
+
+        # Read PDF
+        pdf = fitz.open(stream=file.read(), filetype="pdf")
+
+        text = ""
+        for page in pdf:
+            text += page.get_text()
+
+        # Show content
+        st.text_area("Content", text, height=200)
