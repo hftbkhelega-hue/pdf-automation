@@ -1,7 +1,9 @@
 import streamlit as st
-import fitz  # PyMuPDF
+import requests
 
-st.title("📄 PDF Reader System")
+API_KEY = "K82622807788957"
+
+st.title("📄 PDF OCR Reader")
 
 uploaded_files = st.file_uploader(
     "Upload your PDF files",
@@ -13,12 +15,19 @@ if uploaded_files:
     for file in uploaded_files:
         st.write(f"### 📄 {file.name}")
 
-        # Read PDF
-        pdf = fitz.open(stream=file.read(), filetype="pdf")
+        response = requests.post(
+            "https://api.ocr.space/parse/image",
+            files={"file": file},
+            data={
+                "apikey": API_KEY,
+                "language": "eng"
+            }
+        )
 
-        text = ""
-        for page in pdf:
-            text += page.get_text()
+        result = response.json()
 
-        # Show content
-        st.text_area("Content", text, height=200)
+        try:
+            text = result["ParsedResults"][0]["ParsedText"]
+            st.text_area("Extracted Text", text, height=200)
+        except:
+            st.write("❌ Could not read PDF")
